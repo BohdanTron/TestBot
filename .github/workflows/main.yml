@@ -22,7 +22,7 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v3
       with:
-        dotnet-version: 6.0.x
+        dotnet-version: 6.0.45
         
     - name: Restore dependencies
       run: dotnet restore
@@ -31,10 +31,8 @@ jobs:
       run: dotnet build --configuration Release --no-restore
       
     - name: Publish
-      run: dotnet publish --configuration Release --no-build --property:PublishDir=${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
+      run: dotnet publish --configuration Release --no-build --output '${{ env.AZURE_WEBAPP_PACKAGE_PATH }}'
       
-    - name: List published files
-      run: ls -R ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
       
     - name: Deployment
       uses: azure/webapps-deploy@v2
