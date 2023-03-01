@@ -25,13 +25,13 @@ jobs:
         dotnet-version: 6.0.x
         
     - name: Restore dependencies
-      run: dotnet restore $GITHUB_WORKSPACE/TestBot.sln
+      run: dotnet restore
       
     - name: Build
-      run: dotnet build $GITHUB_WORKSPACE/TestBot.sln --configuration Release --no-restore
+      run: dotnet build --configuration Release --no-restore
       
     - name: Publish
-      run: dotnet publish $GITHUB_WORKSPACE/EchoBot/EchoBot.csproj --configuration Release --no-build --output ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
+      run: dotnet publish EchoBot/EchoBot.csproj --configuration Release --no-build --output ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
       
     - name: Deploy
       uses: azure/webapps-deploy@v2
