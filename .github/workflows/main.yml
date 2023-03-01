@@ -33,7 +33,14 @@ jobs:
     - name: Publish
       run: dotnet publish ~/work/TestBot/TestBot/EchoBot/EchoBot.csproj --configuration Release --no-build --output ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
       
-    - name: Deployment
+    - name: Download a Build Artifact
+      uses: actions/download-artifact@v3.0.2
+      with:
+        name: Build Artifacts
+        path: TestBot/publish/**
+        if-no-files-found: error
+      
+    - name: Deploy
       uses: azure/webapps-deploy@v2
       with:
         app-name: ${{ env.AZURE_WEBAPP_NAME }}
