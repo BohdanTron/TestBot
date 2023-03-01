@@ -39,6 +39,11 @@ jobs:
         name: BuildArtifact
         path: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}/** 
         if-no-files-found: error
+        
+    - name: Download a Build Artifact
+      uses: actions/download-artifact@v3.0.2
+      with:
+        path: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}/** 
       
     - name: Deploy
       uses: azure/webapps-deploy@v2
