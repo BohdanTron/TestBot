@@ -25,13 +25,13 @@ jobs:
         dotnet-version: 6.0.x
         
     - name: Restore dependencies
-      run: dotnet restore
+      run: dotnet restore ./TestBot.sln
       
     - name: Build
-      run: dotnet build --configuration Release --no-restore
+      run: dotnet build ./TestBot.sln --configuration Release --no-restore
       
     - name: Publish
-      run: dotnet publish TestBot/EchoBot.csproj --configuration Release --no-build --output publish
+      run: dotnet publish ./TestBot/EchoBot.csproj --configuration Release --no-build --output publish
       
     - name: Deployment
       uses: azure/webapps-deploy@v2
