@@ -31,7 +31,7 @@ jobs:
       run: dotnet build $GITHUB_WORKSPACE/TestBot.sln --configuration Release --no-restore
       
     - name: Publish
-      run: dotnet publish $GITHUB_WORKSPACE/TestBot/EchoBot/EchoBot.csproj --configuration Release --no-build --output ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
+      run: dotnet publish $GITHUB_WORKSPACE/EchoBot/EchoBot.csproj --configuration Release --no-build --output ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
       
     - name: Deploy
       uses: azure/webapps-deploy@v2
