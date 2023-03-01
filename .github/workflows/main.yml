@@ -31,7 +31,7 @@ jobs:
       run: dotnet build ./TestBot.sln --configuration Release --no-restore
       
     - name: Publish
-      run: dotnet publish ./TestBot/EchoBot.csproj --configuration Release --no-build --output publish
+      run: dotnet publish ./TestBot/TestBot/EchoBot/EchoBot.csproj --configuration Release --no-build --output publish
       
     - name: Deployment
       uses: azure/webapps-deploy@v2
