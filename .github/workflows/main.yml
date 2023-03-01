@@ -1,5 +1,5 @@
 
-name: Build & Publish 
+name: Build & Deploy 
 
 on:
   push:
@@ -14,7 +14,7 @@ env:
 jobs:
   build:
 
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
 
     steps:
     - uses: actions/checkout@v3
@@ -25,20 +25,13 @@ jobs:
         dotnet-version: 6.0.x
         
     - name: Restore dependencies
-      run: dotnet restore
+      run: dotnet restore $GITHUB_WORKSPACE/TestBot.sln
       
     - name: Build
-      run: dotnet build --configuration Release --no-restore
+      run: dotnet build $GITHUB_WORKSPACE/TestBot.sln --configuration Release --no-restore
       
     - name: Publish
-      run: dotnet publish ~/work/TestBot/TestBot/EchoBot/EchoBot.csproj --configuration Release --no-build --output ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
-      
-    - name: Upload a Build Artifact
-      uses: actions/upload-artifact@v3
-      with:
-        name: publish
-        path: ~/work/TestBot/publish/**
-        if-no-files-found: error
+      run: dotnet publish $GITHUB_WORKSPACE/TestBot/TestBot/EchoBot/EchoBot.csproj --configuration Release --no-build --output ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
       
     - name: Deploy
       uses: azure/webapps-deploy@v2
