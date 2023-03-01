@@ -37,7 +37,7 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: publish
-        path: TestBot/publish/**
+        path: ~/work/TestBot/publish/**
         if-no-files-found: error
       
     - name: Deploy
