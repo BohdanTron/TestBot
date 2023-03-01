@@ -36,8 +36,8 @@ jobs:
     - name: Upload a Build Artifact
       uses: actions/upload-artifact@v3
       with:
-        name: publish
-        path: $GITHUB_WORKSPACE/TestBot/publish/**
+        name: BuildArtifact
+        path: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}/** 
         if-no-files-found: error
       
     - name: Deploy
