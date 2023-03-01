@@ -9,7 +9,7 @@ on:
     
 env:
   AZURE_WEBAPP_NAME: btronBotWebApp
-  AZURE_WEBAPP_PACKAGE_PATH: "./publish"
+  AZURE_WEBAPP_PACKAGE_PATH: publish
 
 jobs:
   build:
@@ -31,11 +31,11 @@ jobs:
       run: dotnet build --configuration Release --no-restore
       
     - name: Publish
-      run: dotnet publish ./EchoBot.csproj --configuration Release --no-build --output publish
+      run: dotnet publish ~/work/TestBot/TestBot/EchoBot/EchoBot.csproj --configuration Release --no-build --output ${{ AZURE_WEBAPP_PACKAGE_PATH }}
       
     - name: Deployment
       uses: azure/webapps-deploy@v2
       with:
         app-name: ${{ env.AZURE_WEBAPP_NAME }}
         publish-profile: ${{ secrets.AZURE_PUBLISH_PROFILE }}
-        package: publish
+        package: ${{ AZURE_WEBAPP_PACKAGE_PATH }}
