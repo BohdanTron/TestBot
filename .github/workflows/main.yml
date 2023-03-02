@@ -46,6 +46,12 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
+      - name: Download a Build Artifact
+        uses: actions/download-artifact@v3.0.2
+        with:
+          name: BuildArtifact
+          path: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}/** 
+    
       - name: Deploy
         uses: azure/webapps-deploy@v2
         with:
