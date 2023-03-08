@@ -1,0 +1,60 @@
+
+name: Build & Deploy 
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+    
+env:
+  AZURE_WEBAPP_NAME: btronBotWebApp
+  AZURE_WEBAPP_PACKAGE_PATH: publish
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: 6.0.x
+        
+    - name: Restore dependencies
+      run: dotnet restore
+      
+    - name: Build
+      run: dotnet build --configuration Release --no-restore
+      
+    - name: Publish
+      run: dotnet publish EchoBot/EchoBot.csproj --configuration Release --no-build --output ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
+      
+    - name: Upload a Build Artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: BuildArtifact
+        path: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}/**
+        if-no-files-found: error
+      
+  deploy:
+    needs: [build]
+    
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Download a Build Artifact
+        uses: actions/download-artifact@v3.0.2
+        with:
+          name: BuildArtifact
+          path: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
+    
+      - name: Deploy
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: ${{ env.AZURE_WEBAPP_NAME }}
+          publish-profile: ${{ secrets.AZURE_PUBLISH_PROFILE }}
+          package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
