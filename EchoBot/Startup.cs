@@ -5,6 +5,7 @@
 
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Azure.Cosmos;
 using Microsoft.Bot.Builder;
 using Microsoft.Bot.Builder.Integration.AspNet.Core;
 using Microsoft.Bot.Connector.Authentication;
@@ -39,6 +40,28 @@ namespace EchoBot
 
             // Create the bot as a transient. In this case the ASP Controller is expecting an IBot.
             services.AddTransient<IBot, Bots.EchoBot>();
+
+            services.AddSingleton<MessageCosmosService>(options =>
+            {
+                var url = Configuration.GetSection("AzureCosmosDbSettings")
+                    .GetValue<string>("URL");
+
+                var primaryKey = Configuration.GetSection("AzureCosmosDbSettings")
+                    .GetValue<string>("PrimaryKey");
+
+                var dbName = Configuration.GetSection("AzureCosmosDbSettings")
+                    .GetValue<string>("DatabaseName");
+
+                var containerName = Configuration.GetSection("AzureCosmosDbSettings")
+                    .GetValue<string>("ContainerName");
+
+                var cosmosClient = new CosmosClient(
+                    url,
+                    primaryKey
+                );
+
+                return new MessageCosmosService(cosmosClient, dbName, containerName);
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
