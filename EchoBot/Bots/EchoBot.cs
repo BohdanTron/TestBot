@@ -27,12 +27,12 @@ namespace EchoBot.Bots
                 var replyText = $"Echo: {turnContext.Activity.Text}";
                 await turnContext.SendActivityAsync(MessageFactory.Text(replyText, replyText), cancellationToken);
 
-                await _messageCosmosService.Add(new Message { Id = Guid.NewGuid().ToString(), Text = turnContext.Activity.Text });
+                await _messageCosmosService.Add(new Message { Text = turnContext.Activity.Text });
             }
 
             if (turnContext.Activity.Text == "/all")
             {
-                var allMessages = await _messageCosmosService.Get("select * from c");
+                var allMessages = await _messageCosmosService.GetAll();
 
                 var response = string.Join(", ", allMessages.Select(m => m.Text));
 

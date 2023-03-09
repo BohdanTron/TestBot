@@ -1,6 +1,8 @@
 ﻿using Microsoft.Azure.Cosmos;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Azure.Cosmos.Linq;
 
 namespace EchoBot
 {
@@ -15,18 +17,18 @@ namespace EchoBot
 
         public async Task<Message> Add(Message message)
         {
-            var item = await _container.CreateItemAsync(message, new PartitionKey(message.Id));
+            var item = await _container.CreateItemAsync(message, new PartitionKey(message.Id.ToString()));
             return item;
         }
 
-        public async Task<List<Message>> Get(string sqlCosmosQuery)
+        public async Task<List<Message>> GetAll()
         {
-            var query = _container.GetItemQueryIterator<Message>(new QueryDefinition(sqlCosmosQuery));
+            var iterator = _container.GetItemLinqQueryable<Message>().ToFeedIterator();
 
             var result = new List<Message>();
-            while (query.HasMoreResults)
+            while (iterator.HasMoreResults)
             {
-                var response = await query.ReadNextAsync();
+                var response = await iterator.ReadNextAsync();
                 result.AddRange(response);
             }
 
