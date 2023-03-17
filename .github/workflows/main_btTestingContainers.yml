@@ -31,7 +31,7 @@ jobs:
       with:
         push: true
         tags: index.docker.io/${{ secrets.AzureAppService_ContainerUsername_9f8bd83002564f19a3bed16bc0aa96d5 }}/btron/echobot:${{ github.sha }}
-        file: ./Dockerfile
+        file: EchoBot/Dockerfile
 
   deploy:
     runs-on: ubuntu-latest
