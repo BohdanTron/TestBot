@@ -49,4 +49,4 @@ jobs:
         app-name: 'btTestingContainers'
         slot-name: 'production'
         publish-profile: ${{ secrets.AzureAppService_PublishProfile_5ba181518b994b9d9426065e6ad525fe }}
-        images: 'index.docker.io/${{ secrets.AzureAppService_ContainerUsername_9f8bd83002564f19a3bed16bc0aa96d5 }}/btron/echobot:${{ github.sha }}'
+        images: 'btron/echobot:latest'
