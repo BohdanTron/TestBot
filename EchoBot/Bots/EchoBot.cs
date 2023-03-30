@@ -22,15 +22,27 @@ namespace EchoBot.Bots
 
         protected override async Task OnMessageActivityAsync(ITurnContext<IMessageActivity> turnContext, CancellationToken cancellationToken)
         {
-            if (string.Equals(turnContext.Activity.Text, "wait", StringComparison.CurrentCultureIgnoreCase))
+            // Typing indicator
+            await turnContext.SendActivityAsync(new Activity { Type = ActivityTypes.Typing }, cancellationToken);
+
+            // Suggested actions
+            if (turnContext.Activity.Text == "/suggested-actions")
             {
-                await turnContext.SendActivitiesAsync(new IActivity[]
+                var reply = MessageFactory.Text("What's your favorite color?");
+
+                reply.SuggestedActions = new SuggestedActions
                 {
-                    new Activity { Type = ActivityTypes.Typing },
-                    new Activity { Type = "delay", Value = 3000 },
-                    MessageFactory.Text("Finished typing", "Finished typing")
-                }, cancellationToken);
+                    Actions = new List<CardAction>
+                    {
+                        new() { Title = "Red", Type = ActionTypes.ImBack, Value = "Red", Image = "https://via.placeholder.com/20/FF0000?text=R", ImageAltText = "R" },
+                        new() { Title = "Yellow", Type = ActionTypes.ImBack, Value = "Yellow", Image = "https://via.placeholder.com/20/FFFF00?text=Y", ImageAltText = "Y" },
+                        new() { Title = "Blue", Type = ActionTypes.ImBack, Value = "Blue", Image = "https://via.placeholder.com/20/0000FF?text=B", ImageAltText = "B" }
+                    }
+                };
+
+                await turnContext.SendActivityAsync(reply, cancellationToken);
             }
+            
 
             if (!turnContext.Activity.Text.StartsWith("/"))
             {
