@@ -3,11 +3,7 @@ name: Trigger auto deployment for bot-app-container
 on:
   push:
     branches: [main]
-    paths:
-      - "EchoBot/**"
-      - ".github/workflows/bot-app-container-AutoDeployTrigger-8c3cc2b7-5c22-4155-92c4-d4ffba790288.yml"
 
-  # Allow mannually trigger
   workflow_dispatch:
 
 env:
@@ -54,5 +50,5 @@ jobs:
         with:
           inlineScript: |
             az config set extension.use_dynamic_install=yes_without_prompt
-            az containerapp registry set -n bot-app-container -g rg-testing-purpose --server hub.docker.com --username  ${{ secrets.BOTAPPCONTAINER_REGISTRY_USERNAME }} --password ${{ secrets.BOTAPPCONTAINER_REGISTRY_PASSWORD }}
-            az containerapp update -n bot-app-container -g rg-testing-purpose --image hub.docker.com/btron/echobot:${{ github.sha }}
+            az containerapp registry set -n bot-app-container -g rg-testing-purpose --server index.docker.io --username  ${{ secrets.BOTAPPCONTAINER_REGISTRY_USERNAME }} --password ${{ secrets.BOTAPPCONTAINER_REGISTRY_PASSWORD }}
+            az containerapp update -n bot-app-container -g rg-testing-purpose --image ${{ env.DOCKER_IMAGE_TAG }}
