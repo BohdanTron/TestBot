@@ -26,7 +26,7 @@ namespace EchoBot.Bots
             await turnContext.SendActivityAsync(new Activity { Type = ActivityTypes.Typing }, cancellationToken);
 
             // Suggested actions
-            if (turnContext.Activity.Text == "/suggestedactions")
+            if (turnContext.Activity.Text == "/actions")
             {
                 var reply = MessageFactory.Text("What's your favorite color?");
 
