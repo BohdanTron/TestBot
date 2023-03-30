@@ -22,6 +22,16 @@ namespace EchoBot.Bots
 
         protected override async Task OnMessageActivityAsync(ITurnContext<IMessageActivity> turnContext, CancellationToken cancellationToken)
         {
+            if (string.Equals(turnContext.Activity.Text, "wait", StringComparison.CurrentCultureIgnoreCase))
+            {
+                await turnContext.SendActivitiesAsync(new IActivity[]
+                {
+                    new Activity { Type = ActivityTypes.Typing },
+                    new Activity { Type = "delay", Value = 3000 },
+                    MessageFactory.Text("Finished typing", "Finished typing")
+                }, cancellationToken);
+            }
+
             if (!turnContext.Activity.Text.StartsWith("/"))
             {
                 var replyText = $"Echo: {turnContext.Activity.Text}";
