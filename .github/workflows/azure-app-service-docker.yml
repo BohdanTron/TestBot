@@ -1,4 +1,4 @@
-name: Build and deploy container app to Azure Web App
+name: Build & Deploy to Azure App Service (docker option)
 
 on:
   push:

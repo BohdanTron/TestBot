@@ -1,4 +1,4 @@
-name: Build & Deploy
+name: Build & Deploy to Azure App Service (code option)
 
 on:
   push:
