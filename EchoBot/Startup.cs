@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Azure.Cosmos;
 using Microsoft.Bot.Builder;
+using Microsoft.Bot.Builder.Azure;
 using Microsoft.Bot.Builder.Integration.AspNet.Core;
 using Microsoft.Bot.Connector.Authentication;
 using Microsoft.Extensions.Configuration;
@@ -38,10 +39,7 @@ namespace EchoBot
             // Create the Bot Adapter with error handling enabled.
             services.AddSingleton<IBotFrameworkHttpAdapter, AdapterWithErrorHandler>();
 
-            // Create the bot as a transient. In this case the ASP Controller is expecting an IBot.
-            services.AddTransient<IBot, Bots.EchoBot>();
-
-            services.AddSingleton<MessageCosmosService>(options =>
+            services.AddSingleton(_ =>
             {
                 var url = Configuration.GetSection("AzureCosmosDbSettings")
                     .GetValue<string>("URL");
@@ -62,6 +60,25 @@ namespace EchoBot
 
                 return new MessageCosmosService(cosmosClient, dbName, containerName);
             });
+
+            // Create the storage with User and Conversation state  
+            var cosmosDbStorageOptions = new CosmosDbPartitionedStorageOptions
+            {
+                CosmosDbEndpoint = Configuration.GetSection("AzureCosmosDbSettings").GetValue<string>("URL"),
+                AuthKey = Configuration.GetSection("AzureCosmosDbSettings").GetValue<string>("PrimaryKey"),
+                DatabaseId = Configuration.GetSection("AzureCosmosDbSettings").GetValue<string>("DatabaseName"),
+                ContainerId = "ConversationsHistory"
+            };
+            var storage = new CosmosDbPartitionedStorage(cosmosDbStorageOptions);
+
+            var userState = new UserState(storage);
+            services.AddSingleton(userState);
+
+            var conversationState = new ConversationState(storage);
+            services.AddSingleton(conversationState);
+
+            // Create the bot as a transient. In this case the ASP Controller is expecting an IBot.
+            services.AddTransient<IBot, Bots.EchoBot>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
