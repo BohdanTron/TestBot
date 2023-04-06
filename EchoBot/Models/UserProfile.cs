@@ -1,4 +1,4 @@
-﻿namespace EchoBot.ConversationData
+﻿namespace EchoBot.Models
 {
     public class UserProfile
     {

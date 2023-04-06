@@ -3,7 +3,8 @@
 //
 // Generated with Bot Builder V4 SDK Template for Visual Studio EchoBot v4.18.1
 
-using EchoBot.ConversationData;
+using EchoBot.Models;
+using EchoBot.Services;
 using Microsoft.Bot.Builder;
 using Microsoft.Bot.Schema;
 using System.Collections.Generic;
@@ -15,26 +16,23 @@ namespace EchoBot.Bots
 {
     public class EchoBot : ActivityHandler
     {
-        private readonly BotState _conversationState;
-        private readonly BotState _userState;
+        private readonly StateService _stateService;
         private readonly MessageCosmosService _messageCosmosService;
 
         public EchoBot(
             MessageCosmosService messageCosmosService,
-            ConversationState conversationState,
-            UserState userState)
+            StateService stateService)
         {
+            _stateService = stateService;
             _messageCosmosService = messageCosmosService;
-            _conversationState = conversationState;
-            _userState = userState;
         }
 
         public override async Task OnTurnAsync(ITurnContext turnContext, CancellationToken cancellationToken = new())
         {
             await base.OnTurnAsync(turnContext, cancellationToken);
 
-            await _conversationState.SaveChangesAsync(turnContext, cancellationToken: cancellationToken);
-            await _userState.SaveChangesAsync(turnContext, cancellationToken: cancellationToken);
+            await _stateService.ConversationState.SaveChangesAsync(turnContext, cancellationToken: cancellationToken);
+            await _stateService.UserState.SaveChangesAsync(turnContext, cancellationToken: cancellationToken);
         }
 
         protected override async Task OnMessageActivityAsync(ITurnContext<IMessageActivity> turnContext, CancellationToken cancellationToken)
@@ -42,8 +40,7 @@ namespace EchoBot.Bots
             // Typing indicator
             await turnContext.SendActivityAsync(new Activity { Type = ActivityTypes.Typing }, cancellationToken);
 
-            var conversationData = await _userState.CreateProperty<ConversationData.ConversationData>(nameof(ConversationState))
-                .GetAsync(turnContext, () => new ConversationData.ConversationData(), cancellationToken);
+            var conversationData = await _stateService.ConversationDataAccessor.GetAsync(turnContext, () => new ConversationData(), cancellationToken);
 
             if (conversationData.PromptedUserForName)
             {
@@ -98,13 +95,14 @@ namespace EchoBot.Bots
 
         private async Task SendStateData(ITurnContext<IMessageActivity> turnContext, CancellationToken cancellationToken)
         {
-            var conversationData = await _userState.CreateProperty<ConversationData.ConversationData>(nameof(ConversationState))
-                .GetAsync(turnContext, () => new ConversationData.ConversationData(), cancellationToken);
+            var conversationData = await _stateService.ConversationDataAccessor.GetAsync(turnContext, () => new ConversationData(), cancellationToken);
 
-            var userProfile = await _userState.CreateProperty<UserProfile>(nameof(UserProfile))
-                .GetAsync(turnContext, () => new UserProfile(), cancellationToken);
+            var userProfile = await _stateService.UserProfileAccessor.GetAsync(turnContext, () => new UserProfile(), cancellationToken);
 
-            userProfile.Name = turnContext.Activity.Text?.Trim();
+            if (string.IsNullOrEmpty(userProfile.Name))
+            {
+                userProfile.Name = turnContext.Activity.Text?.Trim();
+            }
 
             await turnContext.SendActivityAsync($"Thanks {userProfile.Name}, here's your state data:",
                 cancellationToken: cancellationToken);
@@ -121,8 +119,7 @@ namespace EchoBot.Bots
 
         protected override async Task OnMembersAddedAsync(IList<ChannelAccount> membersAdded, ITurnContext<IConversationUpdateActivity> turnContext, CancellationToken cancellationToken)
         {
-            var conversationData = await _userState.CreateProperty<ConversationData.ConversationData>(nameof(ConversationState))
-                .GetAsync(turnContext, () => new ConversationData.ConversationData(), cancellationToken);
+            var conversationData = await _stateService.ConversationDataAccessor.GetAsync(turnContext, () => new ConversationData(), cancellationToken);
 
             var welcomeText = "Hello, what's your name?";
             foreach (var member in membersAdded)
