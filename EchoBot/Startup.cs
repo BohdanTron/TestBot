@@ -3,6 +3,8 @@
 //
 // Generated with Bot Builder V4 SDK Template for Visual Studio EchoBot v4.18.1
 
+using EchoBot.Bots;
+using EchoBot.Dialogs;
 using EchoBot.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -64,7 +66,11 @@ namespace EchoBot
             
             ConfigureState(services);
 
-            services.AddTransient<IBot, Bots.EchoBot>();
+            services.AddSingleton<MainDialog>();
+
+            //services.AddTransient<IBot, Bots.EchoBot>();
+
+            services.AddTransient<IBot, DialogBot<MainDialog>>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

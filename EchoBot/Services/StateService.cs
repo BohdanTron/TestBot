@@ -1,5 +1,6 @@
 ﻿using EchoBot.Models;
 using Microsoft.Bot.Builder;
+using Microsoft.Bot.Builder.Dialogs;
 
 namespace EchoBot.Services
 {
@@ -10,6 +11,7 @@ namespace EchoBot.Services
 
         public IStatePropertyAccessor<UserProfile> UserProfileAccessor { get; set; }
         public IStatePropertyAccessor<ConversationData> ConversationDataAccessor { get; set; }
+        public IStatePropertyAccessor<DialogState> DialogStateAccessor { get; set; }
 
 
         public StateService(UserState userState, ConversationState conversationState)
@@ -25,6 +27,7 @@ namespace EchoBot.Services
             UserProfileAccessor = UserState.CreateProperty<UserProfile>($"{nameof(StateService)}.{nameof(UserProfile)}");
 
             ConversationDataAccessor = ConversationState.CreateProperty<ConversationData>($"{nameof(StateService)}.{nameof(ConversationData)}");
+            DialogStateAccessor = ConversationState.CreateProperty<DialogState>($"{nameof(StateService)}.{nameof(DialogState)}");
         }
     }
 }
