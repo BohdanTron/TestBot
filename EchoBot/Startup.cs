@@ -3,6 +3,7 @@
 //
 // Generated with Bot Builder V4 SDK Template for Visual Studio EchoBot v4.18.1
 
+using System.Collections.Concurrent;
 using EchoBot.Bots;
 using EchoBot.Dialogs;
 using EchoBot.Services;
@@ -13,6 +14,7 @@ using Microsoft.Bot.Builder;
 using Microsoft.Bot.Builder.Azure;
 using Microsoft.Bot.Builder.Integration.AspNet.Core;
 using Microsoft.Bot.Connector.Authentication;
+using Microsoft.Bot.Schema;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -35,6 +37,9 @@ namespace EchoBot
             {
                 options.SerializerSettings.MaxDepth = HttpHelper.BotMessageSerializerSettings.MaxDepth;
             });
+
+            // In memory storage of conversation references for proactive messages
+            services.AddSingleton<ConcurrentDictionary<string, ConversationReference>>();
 
             // Create the Bot Framework Authentication to be used with the Bot Adapter.
             services.AddSingleton<BotFrameworkAuthentication, ConfigurationBotFrameworkAuthentication>();

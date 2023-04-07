@@ -3,6 +3,7 @@ using Microsoft.Bot.Builder;
 using Microsoft.Bot.Builder.Dialogs;
 using Microsoft.Bot.Schema;
 using Microsoft.Extensions.Logging;
+using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -10,12 +11,16 @@ namespace EchoBot.Bots
 {
     public class DialogBot<T> : ActivityHandler where T : Dialog
     {
+        private readonly ConcurrentDictionary<string, ConversationReference> _conversationReferences;
+
         protected readonly Dialog Dialog;
         protected readonly StateService StateService;
         protected readonly ILogger Logger;
 
-        public DialogBot(T dialog, StateService stateService, ILogger<DialogBot<T>> logger)
+        public DialogBot(ConcurrentDictionary<string, ConversationReference> conversationReferences, T dialog, StateService stateService, ILogger<DialogBot<T>> logger)
         {
+            _conversationReferences = conversationReferences;
+
             Dialog = dialog;
             StateService = stateService;
             Logger = logger;
@@ -34,7 +39,16 @@ namespace EchoBot.Bots
             Logger.LogInformation("Running dialog from Message Activity");
 
             await Dialog.RunAsync(turnContext, StateService.DialogStateAccessor, cancellationToken);
-            //await Dialog.Run(turnContext, StateService.DialogStateAccessor, cancellationToken);
+
+            AddConversationReference(turnContext.Activity);
+        }
+
+        private void AddConversationReference(IActivity activity)
+        {
+            var conversationReference = activity.GetConversationReference();
+
+            _conversationReferences.AddOrUpdate(conversationReference.User.Id, conversationReference,
+                (_, _) => conversationReference);
         }
     }
 }
