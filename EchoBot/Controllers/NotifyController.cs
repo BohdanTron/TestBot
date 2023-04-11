@@ -34,7 +34,7 @@ namespace EchoBot.Controllers
             foreach (var conversation in _confConversationReferences.Values)
             {
                 var message =
-                    $"ActivityId = {conversation.ActivityId}\n ChannelId = {conversation.ChannelId}\n BotName = {conversation.Bot.Name}\n Username = {conversation.User.Name}";
+                    $"ActivityId = {conversation.ActivityId}\n ChannelId = {conversation.ChannelId}\n BotName = {conversation.Bot.Name}\n Username = {conversation.User.Name}\n ServiceUrl = {conversation.ServiceUrl}";
 
                 _logger.LogInformation(message);
 
