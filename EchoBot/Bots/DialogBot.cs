@@ -38,9 +38,9 @@ namespace EchoBot.Bots
         {
             Logger.LogInformation("Running dialog from Message Activity");
 
-            await Dialog.RunAsync(turnContext, StateService.DialogStateAccessor, cancellationToken);
-
             AddConversationReference(turnContext.Activity);
+
+            await Dialog.RunAsync(turnContext, StateService.DialogStateAccessor, cancellationToken);
         }
 
         private void AddConversationReference(IActivity activity)

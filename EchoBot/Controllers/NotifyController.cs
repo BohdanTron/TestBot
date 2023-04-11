@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Bot.Builder;
 using Microsoft.Bot.Builder.Integration.AspNet.Core;
 using Microsoft.Bot.Schema;
+using Microsoft.Extensions.Logging;
 
 namespace EchoBot.Controllers
 {
@@ -16,18 +17,27 @@ namespace EchoBot.Controllers
         private readonly IBotFrameworkHttpAdapter _adapter;
         private readonly ConcurrentDictionary<string, ConversationReference> _confConversationReferences;
 
+        private readonly ILogger _logger;
+
         public NotifyController(
             IBotFrameworkHttpAdapter adapter, 
-            ConcurrentDictionary<string, ConversationReference> confConversationReferences)
+            ConcurrentDictionary<string, ConversationReference> confConversationReferences,
+            ILogger<NotifyController> logger)
         {
             _adapter = adapter;
             _confConversationReferences = confConversationReferences;
+            _logger = logger;
         }
 
         public async Task<ActionResult> Get()
         {
             foreach (var conversation in _confConversationReferences.Values)
             {
+                var message =
+                    $"ActivityId = {conversation.ActivityId}\n ChannelId = {conversation.ChannelId}\n BotName = {conversation.Bot.Name}\n Username = {conversation.User.Name}";
+
+                _logger.LogInformation(message);
+
                 await ((BotAdapter)_adapter).ContinueConversationAsync(string.Empty, conversation,
                     async (context, token) =>
                     {
