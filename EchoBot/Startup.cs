@@ -3,7 +3,6 @@
 //
 // Generated with Bot Builder V4 SDK Template for Visual Studio EchoBot v4.18.1
 
-using System.Collections.Concurrent;
 using EchoBot.Bots;
 using EchoBot.Dialogs;
 using EchoBot.Services;
@@ -11,13 +10,14 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Azure.Cosmos;
 using Microsoft.Bot.Builder;
-using Microsoft.Bot.Builder.Azure;
+using Microsoft.Bot.Builder.Azure.Blobs;
 using Microsoft.Bot.Builder.Integration.AspNet.Core;
 using Microsoft.Bot.Connector.Authentication;
 using Microsoft.Bot.Schema;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using System.Collections.Concurrent;
 
 namespace EchoBot
 {
@@ -68,7 +68,7 @@ namespace EchoBot
 
                 return new MessageCosmosService(cosmosClient, dbName, containerName);
             });
-            
+
             ConfigureState(services);
 
             services.AddSingleton<MainDialog>();
@@ -101,15 +101,22 @@ namespace EchoBot
 
         private void ConfigureState(IServiceCollection services)
         {
-            var cosmosDbStorageOptions = new CosmosDbPartitionedStorageOptions
-            {
-                CosmosDbEndpoint = Configuration.GetSection("AzureCosmosDbSettings").GetValue<string>("URL"),
-                AuthKey = Configuration.GetSection("AzureCosmosDbSettings").GetValue<string>("PrimaryKey"),
-                DatabaseId = Configuration.GetSection("AzureCosmosDbSettings").GetValue<string>("DatabaseName"),
-                ContainerId = "ConversationsHistory"
-            };
+            var storage =
+                new BlobsStorage(
+                    "DefaultEndpointsProtocol=https;AccountName=bt01storageaccount;AccountKey=7prsQKfGEThE41mUXI83BH6rVFlU7anB0A6nwMVlS2ZAbjaB2lwdmBVFNdDVyhYcVnA15X7J+znb+AStK6j2cg==;EndpointSuffix=core.windows.net",
+                    "bot-state");
 
-            services.AddSingleton<IStorage>(new CosmosDbPartitionedStorage(cosmosDbStorageOptions));
+            services.AddSingleton<IStorage>(storage);
+
+            //var cosmosDbStorageOptions = new CosmosDbPartitionedStorageOptions
+            //{
+            //    CosmosDbEndpoint = Configuration.GetSection("AzureCosmosDbSettings").GetValue<string>("URL"),
+            //    AuthKey = Configuration.GetSection("AzureCosmosDbSettings").GetValue<string>("PrimaryKey"),
+            //    DatabaseId = Configuration.GetSection("AzureCosmosDbSettings").GetValue<string>("DatabaseName"),
+            //    ContainerId = "ConversationsHistory"
+            //};
+
+            //services.AddSingleton<IStorage>(new CosmosDbPartitionedStorage(cosmosDbStorageOptions));
 
             services.AddSingleton<UserState>();
 
