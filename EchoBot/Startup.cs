@@ -3,6 +3,7 @@
 //
 // Generated with Bot Builder V4 SDK Template for Visual Studio EchoBot v4.18.1
 
+using Azure.Data.Tables;
 using EchoBot.Bots;
 using EchoBot.Dialogs;
 using EchoBot.Services;
@@ -13,11 +14,10 @@ using Microsoft.Bot.Builder;
 using Microsoft.Bot.Builder.Azure.Blobs;
 using Microsoft.Bot.Builder.Integration.AspNet.Core;
 using Microsoft.Bot.Connector.Authentication;
-using Microsoft.Bot.Schema;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using System.Collections.Concurrent;
+using System;
 
 namespace EchoBot
 {
@@ -39,7 +39,15 @@ namespace EchoBot
             });
 
             // In memory storage of conversation references for proactive messages
-            services.AddSingleton<ConcurrentDictionary<string, ConversationReference>>();
+            //services.AddSingleton<ConcurrentDictionary<string, ConversationReference>>();
+
+            // Register Azure Table Storage
+            var tableServiceClient =
+                new TableServiceClient(new Uri("https://bt01storageaccount.table.core.windows.net/"),
+                    new TableSharedKeyCredential("bt01storageaccount",
+                        "7prsQKfGEThE41mUXI83BH6rVFlU7anB0A6nwMVlS2ZAbjaB2lwdmBVFNdDVyhYcVnA15X7J+znb+AStK6j2cg=="));
+
+            services.AddSingleton(tableServiceClient);
 
             // Create the Bot Framework Authentication to be used with the Bot Adapter.
             services.AddSingleton<BotFrameworkAuthentication, ConfigurationBotFrameworkAuthentication>();

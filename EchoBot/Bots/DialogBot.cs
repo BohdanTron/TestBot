@@ -1,29 +1,30 @@
-﻿using EchoBot.Services;
+﻿using Azure.Data.Tables;
+using EchoBot.Models;
+using EchoBot.Services;
 using Microsoft.Bot.Builder;
 using Microsoft.Bot.Builder.Dialogs;
 using Microsoft.Bot.Schema;
 using Microsoft.Extensions.Logging;
-using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 
 namespace EchoBot.Bots
 {
     public class DialogBot<T> : ActivityHandler where T : Dialog
     {
-        private readonly ConcurrentDictionary<string, ConversationReference> _conversationReferences;
+        private readonly TableServiceClient _tableServiceClient;
 
         protected readonly Dialog Dialog;
         protected readonly StateService StateService;
         protected readonly ILogger Logger;
 
-        public DialogBot(ConcurrentDictionary<string, ConversationReference> conversationReferences, T dialog, StateService stateService, ILogger<DialogBot<T>> logger)
+        public DialogBot(T dialog, StateService stateService, ILogger<DialogBot<T>> logger, TableServiceClient tableServiceClient)
         {
-            _conversationReferences = conversationReferences;
-
             Dialog = dialog;
             StateService = stateService;
             Logger = logger;
+            _tableServiceClient = tableServiceClient;
         }
 
         public override async Task OnTurnAsync(ITurnContext turnContext, CancellationToken cancellationToken = new())
@@ -38,17 +39,25 @@ namespace EchoBot.Bots
         {
             Logger.LogInformation("Running dialog from Message Activity");
 
-            AddConversationReference(turnContext.Activity);
+            await AddConversationReference(turnContext.Activity);
 
             await Dialog.RunAsync(turnContext, StateService.DialogStateAccessor, cancellationToken);
         }
 
-        private void AddConversationReference(IActivity activity)
+        private async Task AddConversationReference(IActivity activity)
         {
-            var conversationReference = activity.GetConversationReference();
+            var conversation = activity.GetConversationReference();
 
-            _conversationReferences.AddOrUpdate(conversationReference.User.Id, conversationReference,
-                (_, _) => conversationReference);
+            var conversationReferenceEntity = new ConversationReferenceEntity
+            {
+                PartitionKey = conversation.User.Id,
+                RowKey = conversation.Conversation.Id,
+                ConversationReference = JsonConvert.SerializeObject(activity.GetConversationReference())
+            };
+
+            var table = _tableServiceClient.GetTableClient("ConversationReferences");
+
+            await table.AddEntityAsync(conversationReferenceEntity);
         }
     }
 }

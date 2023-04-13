@@ -1,13 +1,15 @@
-﻿using System.Collections.Concurrent;
-using System.Net;
-using System.Threading;
-using System.Threading.Tasks;
+﻿using Azure.Data.Tables;
+using EchoBot.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Bot.Builder;
 using Microsoft.Bot.Builder.Integration.AspNet.Core;
 using Microsoft.Bot.Schema;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
+using System.Net;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace EchoBot.Controllers
 {
@@ -17,35 +19,36 @@ namespace EchoBot.Controllers
     {
         private readonly IBotFrameworkHttpAdapter _adapter;
         private readonly string _appId;
-        private readonly ConcurrentDictionary<string, ConversationReference> _confConversationReferences;
 
         private readonly ILogger _logger;
+
+        private readonly TableServiceClient _tableServiceClient;
 
         public NotifyController(
             IBotFrameworkHttpAdapter adapter,
             IConfiguration configuration,
-            ConcurrentDictionary<string, ConversationReference> confConversationReferences,
-            ILogger<NotifyController> logger)
+            ILogger<NotifyController> logger,
+            TableServiceClient tableServiceClient)
         {
             _adapter = adapter;
             _appId = configuration["MicrosoftAppId"] ?? string.Empty;
-            _confConversationReferences = confConversationReferences;
             _logger = logger;
+            _tableServiceClient = tableServiceClient;
         }
 
         public async Task<ActionResult> Get()
         {
-            foreach (var conversation in _confConversationReferences.Values)
+            var table = _tableServiceClient.GetTableClient("ConversationReferences");
+
+            var conversations = table.QueryAsync<ConversationReferenceEntity>();
+
+            await foreach (var conversation in conversations)
             {
-                var message =
-                    $"ActivityId = {conversation.ActivityId}\n ChannelId = {conversation.ChannelId}\n BotName = {conversation.Bot.Name}\n Username = {conversation.User.Name}\n ServiceUrl = {conversation.ServiceUrl}";
-
-                _logger.LogInformation(message);
-
-                await ((BotAdapter)_adapter).ContinueConversationAsync(_appId, conversation,
+                await ((BotAdapter) _adapter).ContinueConversationAsync(_appId, JsonConvert.DeserializeObject<ConversationReference>(conversation.ConversationReference),
                     async (context, token) =>
                     {
                         await context.SendActivityAsync("Hi, it's a proactive message", cancellationToken: token);
+                        await context.SendActivityAsync(conversation.ConversationReference, cancellationToken: token);
                     }, CancellationToken.None);
             }
 
@@ -53,7 +56,7 @@ namespace EchoBot.Controllers
             {
                 Content = "<html><body><h1>Proactive messages have been sent.</h1></body></html>",
                 ContentType = "text/html",
-                StatusCode = (int)HttpStatusCode.OK,
+                StatusCode = (int) HttpStatusCode.OK,
             };
         }
     }
