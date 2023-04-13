@@ -57,7 +57,7 @@ namespace EchoBot.Bots
 
             var table = _tableServiceClient.GetTableClient("ConversationReferences");
 
-            await table.AddEntityAsync(conversationReferenceEntity);
+            await table.UpsertEntityAsync(conversationReferenceEntity);
         }
     }
 }
