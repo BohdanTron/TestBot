@@ -43,9 +43,8 @@ namespace EchoBot
 
             // Register Azure Table Storage
             var tableServiceClient =
-                new TableServiceClient(new Uri("https://bt01storageaccount.table.core.windows.net/"),
-                    new TableSharedKeyCredential("bt01storageaccount",
-                        "7prsQKfGEThE41mUXI83BH6rVFlU7anB0A6nwMVlS2ZAbjaB2lwdmBVFNdDVyhYcVnA15X7J+znb+AStK6j2cg=="));
+                new TableServiceClient(new Uri(Configuration["AzureTableStorageSettings:Endpoint"]),
+                    new TableSharedKeyCredential(Configuration["AzureTableStorageSettings:AccountName"], Configuration["AzureTableStorageSettings:AccountKey"]));
 
             services.AddSingleton(tableServiceClient);
 
@@ -109,12 +108,10 @@ namespace EchoBot
 
         private void ConfigureState(IServiceCollection services)
         {
-            var storage =
-                new BlobsStorage(
-                    "DefaultEndpointsProtocol=https;AccountName=bt01storageaccount;AccountKey=7prsQKfGEThE41mUXI83BH6rVFlU7anB0A6nwMVlS2ZAbjaB2lwdmBVFNdDVyhYcVnA15X7J+znb+AStK6j2cg==;EndpointSuffix=core.windows.net",
-                    "bot-state");
+            var connectionString = Configuration["StateSettings:ConnectionString"];
+            var containerName = Configuration["StateSettings:ContainerName"];
 
-            services.AddSingleton<IStorage>(storage);
+            services.AddSingleton<IStorage>(new BlobsStorage(connectionString, containerName));
 
             //var cosmosDbStorageOptions = new CosmosDbPartitionedStorageOptions
             //{
